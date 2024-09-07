@@ -364,6 +364,26 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
           // Ignore
         }
       }
+
+      // Check if the clipboard contains an image
+      const items = clipboardData.items;
+      if (items) {
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const file = items[i].getAsFile();
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const base64Image = event.target.result;
+              const markdownImage = `![Image](${base64Image})`;
+              replace(selectionMgr.selectionStart, selectionMgr.selectionEnd, markdownImage);
+              adjustCursorPosition();
+            };
+            reader.readAsDataURL(file);
+            return;
+          }
+        }
+      }
+
     } else {
       ({ clipboardData } = window.clipboardData);
       data = clipboardData && clipboardData.getData('Text');
